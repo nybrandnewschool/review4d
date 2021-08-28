@@ -98,6 +98,6 @@ Contributions are welcome.
 
 1. Fork this repository.
 2. Make your changes.
-3. Add tests.
-4. Run tests. **c4dpy -m tests**
+3. Add tests to validate your changes.
+4. Run tests. `c4dpy -m tests`
 5. Create a pull request.
