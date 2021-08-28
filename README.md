@@ -1,29 +1,31 @@
+<p align="center"><img src="https://github.com/nybrandnewschool/review4d/blob/main/icon.png?raw=true" width="96px" /></p>
+
 # review4d
-A library and plugin for cinema4D allowing users to render previews to preset locations and perform actions after the render completes.
+A python plugin and library for Cinema 4D R24+ allowing users to render previews to preset locations and perform actions after a render completes.
 
 ## Installation
-You can use git to install this plugin by cloning it into your c4d plugins
-directory.
+### Git
+You can use git to install review4d by cloning it into your c4d plugins directory.
 
-Alternatively you can download a zip of this repo and extract it into your
-c4d plugins directory.
+### Download
+Alternatively you can download a release and extract it into your c4d plugins directory.
 
 ## Usage
-Use the **Render for Review** command in the Extensions menu to pull up the
+1. Use the **Render for Review** command in the Extensions menu to pull up the
 render dialog.
 
-![Extensions](https://github.com/nybrandnewschool/review4d/blob/main/res/extensions.png?raw=true) ![Dialog](https://github.com/nybrandnewschool/review4d/blob/main/res/render_for_review_dialog.png?raw=true)
+    ![Extensions](https://github.com/nybrandnewschool/review4d/blob/main/res/extensions.png?raw=true) ![Dialog](https://github.com/nybrandnewschool/review4d/blob/main/res/render_for_review_dialog.png?raw=true)
 
-Adjust the settings in the dialog. Review4d will add new render settings called **Review Settings** to your scene. You can use the **Edit Review Settings** button to edit the viewport settings in the Render Settings window.
+2. Adjust the settings in the dialog. Review4d will add new render settings to your document called **Review Settings**. You can use the **Edit Review Settings** button to edit the viewport settings in the Render Settings window.
 
-![Render Settings](https://github.com/nybrandnewschool/review4d/blob/main/res/render_settings.png?raw=true)
+    ![Render Settings](https://github.com/nybrandnewschool/review4d/blob/main/res/render_settings.png?raw=true)
 
-If you have ShotGrid toolkit and the accompanying tk-cinema app running in your Cinema4D session you can enable the **Upload to ShotGrid** checkbox. After the render finishes a dialog will appear to let you upload it to ShotGrid.
+3. If you have [ShotGrid](https://www.shotgridsoftware.com) toolkit and the accompanying [tk-cinema](https://github.com/mikedatsik/tk-cinema) app running in your Cinema4D session you can enable the **Upload to ShotGrid** checkbox. After the render finishes a dialog will appear to let you upload it to ShotGrid.
 
-![Upload to ShotGrid](https://github.com/nybrandnewschool/review4d/blob/main/res/upload_to_shotgrid.png)
+    ![Upload to ShotGrid](https://github.com/nybrandnewschool/review4d/blob/main/res/upload_to_shotgrid.png)
 
 ## Plugins
-review4d allows customization through the use of plugins. Create a python file and place it in the plugins folder. Subclass one of the plugin types like PathPreset, ContextCollector, or PostRender and register them in a module level register function.
+review4d allows customization through the use of plugins. Create a python module and place it in the `review4d/plugins` folder. Alternatively, you can add a custom path to the environment variable `REVIEW4D_PLUGINS` and place your python modules there. Subclass one of the plugin types like PathPreset, ContextCollector, or PostRender and register them in a module level register function.
 
 ![Plugins](https://github.com/nybrandnewschool/review4d/blob/main/res/render_for_review_plugins.png)
 
@@ -66,6 +68,30 @@ PathPreset plugin.
         ...
         review4d.register_plugin(MyPathPreset)
 
+Finally we can create a PostRender plugin to show the rendered file in windows explorer or finder.
+
+    ...
+    import sys
+    import subprocess
+ 
+    ...
+    class ShowInFileBrowser(review4d.PostRender):
+    
+        label = 'Show in File Browser'
+        enabled = True  # Enable the checkbox in the UI by default
+ 
+        def is_available(self):
+            # You can return False here if your plugin has some required resources 
+            # that are unavailable. See the `review4d/plugins/shotgrid.py` for an example.
+            return True
+    
+        def execute(self, render_path):
+            if sys.platform == 'darwin':
+                subprocess.run(['open', '-R', render_path])
+            elif sys.platform == 'linux2':
+                subprocess.run(['xdg-open', os.path.dirname(render_path)])
+            elif sys.platform == 'win32':
+                subprocess.run(['explorer', '/select,', render_path.replace('/', '\\')])
 
 ## Contibuting
 Contributions are welcome.
