@@ -1,0 +1,11 @@
+name: review4d
+version: 0.1.0
+description: 'Extendable Review tool for Cinema4D.'
+author: Dan Bradham
+email: dan@brandnewschool.com
+requires: []
+environment:
+    C4D_PLUGINS_DIR:
+      - $MODULE
+    g_additionalModulePath:
+      - $MODULE
