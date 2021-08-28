@@ -12,18 +12,20 @@ c4d plugins directory.
 Use the **Render for Review** command in the Extensions menu to pull up the
 render dialog.
 
-img1 img2
+![Extensions](https://github.com/nybrandnewschool/review4d/blob/main/res/extensions.png?raw=true) ![Dialog](https://github.com/nybrandnewschool/review4d/blob/main/res/render_for_review_dialog.png?raw=true)
 
 Adjust the settings in the dialog. Review4d will add new render settings called **Review Settings** to your scene. You can use the **Edit Review Settings** button to edit the viewport settings in the Render Settings window.
 
-img3
+![Render Settings](https://github.com/nybrandnewschool/review4d/blob/main/res/render_settings.png?raw=true)
 
 If you have ShotGrid toolkit and the accompanying tk-cinema app running in your Cinema4D session you can enable the **Upload to ShotGrid** checkbox. After the render finishes a dialog will appear to let you upload it to ShotGrid.
 
-img4
+![Upload to ShotGrid](https://github.com/nybrandnewschool/review4d/blob/main/res/upload_to_shotgrid.png)
 
 ## Plugins
-review4d allows customization through the use of plugins. Create a python file and place it in the plugins folder. Subclass one of the plugin types like PathPreset or ContextCollector and register them in a module level register function.
+review4d allows customization through the use of plugins. Create a python file and place it in the plugins folder. Subclass one of the plugin types like PathPreset, ContextCollector, or PostRender and register them in a module level register function.
+
+![Plugins](https://github.com/nybrandnewschool/review4d/blob/main/res/render_for_review_plugins.png)
 
 ContextCollector plugins are used to extract useful data from document paths. But you can include any data in the context that you want. The extracted context is then passed to PathPreset plugins to generate output file paths.
 
