@@ -56,7 +56,7 @@ class Review4dDialog(gui.GeDialog):
         self.SetTitle('Render for Review')
 
         if self.GroupBegin(self.GROUP_PATH, c4d.BFH_SCALEFIT, title='Path'):
-            self.GroupBorder(c4d.BORDER_GROUP_IN)
+            self.GroupBorder(c4d.BORDER_IN)
             self.GroupBorderSpace(4, 4, 4, 4)
             self.AddComboBox(self.COMBO_PRESET, c4d.BFH_LEFT, initw=120)
             self.AddEditText(self.EDIT_PATH, c4d.BFH_SCALEFIT)
@@ -64,7 +64,7 @@ class Review4dDialog(gui.GeDialog):
         self.GroupEnd()
 
         if self.GroupBegin(self.GROUP_SETTINGS, c4d.BFH_SCALEFIT, cols=3, rows=3, title='Settings'):
-            self.GroupBorder(c4d.BORDER_GROUP_IN)
+            self.GroupBorder(c4d.BORDER_IN)
             self.GroupBorderSpace(4, 4, 4, 4)
             self.AddStaticText(self.LABEL_RESOLUTION, c4d.BFH_RIGHT, name='Resolution')
             self.AddEditNumberArrows(self.EDIT_XRES, c4d.BFH_LEFT, initw=120)
@@ -73,14 +73,14 @@ class Review4dDialog(gui.GeDialog):
             self.AddEditNumberArrows(self.EDIT_FPS, c4d.BFH_LEFT, initw=120)
             self.AddStaticText(self.SPACE_FPS, c4d.BFH_LEFT, name='')
             self.AddStaticText(self.LABEL_FRAMESEQUENCE, c4d.BFH_RIGHT, name='Frames')
-            self.AddComboBox(self.COMBO_FRAMESEQUENCE, c4d.BFH_LEFT, initw=112)
+            self.AddComboBox(self.COMBO_FRAMESEQUENCE, c4d.BFH_LEFT, initw=128)
             self.AddStaticText(self.SPACE_FRAMES, c4d.BFH_LEFT, name='')
             # self.AddCheckbox(self.CBOX_PICTUREVIEWER, c4d.BFH_LEFT, initw=0, inith=0, name='Send to Picture Viewer')
         self.GroupEnd()
 
         if self.post_renderers:
             if self.GroupBegin(self.GROUP_POSTRENDER, c4d.BFH_SCALEFIT, cols=2, title='Post Render'):
-                self.GroupBorder(c4d.BORDER_GROUP_IN)
+                self.GroupBorder(c4d.BORDER_IN)
                 self.GroupBorderSpace(4, 4, 4, 4)
                 self.GroupSpace(20, 10)
                 for post_renderer in self.post_renderers:
@@ -90,7 +90,8 @@ class Review4dDialog(gui.GeDialog):
             self.GroupEnd()
 
         if self.GroupBegin(self.GROUP_BUTTONS, c4d.BFH_RIGHT | c4d.BFV_SCALE | c4d.BFV_BOTTOM, title=''):
-            self.GroupBorderSpace(4, 20, 4, 4)
+            self.GroupBorderNoTitle(c4d.BORDER_GROUP_OUT)
+            self.GroupBorderSpace(4, 10, 4, 4)
             self.AddButton(self.BUTTON_RENDER_SETTINGS, c4d.BFH_RIGHT, name='Edit Review Settings')
             self.AddButton(self.BUTTON_RENDER, c4d.BFH_RIGHT, name='Render')
         self.GroupEnd()
@@ -110,8 +111,8 @@ class Review4dDialog(gui.GeDialog):
 
         self.SetInt32(self.COMBO_FRAMESEQUENCE, self.COMBO_FRAMESEQUENCE_DEFAULT)
         self.SetInt32(self.COMBO_PRESET, presets[0].id)
-        self.SetInt32(self.EDIT_XRES, 1920, min=256, max=4096, step=2)
-        self.SetInt32(self.EDIT_YRES, 1080, min=256, max=4096, step=2)
+        self.SetInt32(self.EDIT_XRES, 1920, min=256, max=8192, step=2)
+        self.SetInt32(self.EDIT_YRES, 1080, min=256, max=8192, step=2)
         self.SetInt32(self.EDIT_FPS, doc[c4d.DOCUMENT_FPS])
         # self.SetBool(self.CBOX_PICTUREVIEWER, True)
 
