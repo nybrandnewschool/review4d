@@ -60,7 +60,7 @@ class ShotGridUploaderDialog(c4d.gui.GeDialog):
         self.SetTitle('Upload Preview to ShotGrid'.format(self.file_name))
 
         if self.GroupBegin(self.GROUP_CONTEXT, c4d.BFH_SCALEFIT, cols=2, rows=2, title='Context'):
-            self.GroupBorder(c4d.BORDER_GROUP_IN)
+            self.GroupBorder(c4d.BORDER_IN)
             self.GroupBorderSpace(4, 4, 4, 4)
             self.AddStaticText(self.LABEL_ENTITY, c4d.BFH_RIGHT, name='Entity')
             self.AddComboBox(self.COMBO_ENTITY, c4d.BFH_SCALEFIT, allowfiltering=True)
@@ -69,7 +69,7 @@ class ShotGridUploaderDialog(c4d.gui.GeDialog):
         self.GroupEnd()
 
         if self.GroupBegin(self.GROUP_VERSION, c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, cols=2, rows=2, title='Version Info'):
-            self.GroupBorder(c4d.BORDER_GROUP_IN)
+            self.GroupBorder(c4d.BORDER_IN)
             self.GroupBorderSpace(4, 4, 4, 4)
             self.AddStaticText(self.LABEL_FILE, c4d.BFH_RIGHT, name='File')
             if self.GroupBegin(self.GROUP_BROWSE, c4d.BFH_SCALEFIT, cols=2):
@@ -83,7 +83,7 @@ class ShotGridUploaderDialog(c4d.gui.GeDialog):
         self.GroupEnd()
 
         if self.GroupBegin(self.GROUP_BUTTONS, c4d.BFH_RIGHT | c4d.BFV_BOTTOM, title=''):
-            self.GroupBorderSpace(4, 20, 4, 4)
+            self.GroupBorderSpace(4, 10, 4, 4)
             self.AddButton(self.BUTTON_UPLOAD, c4d.BFH_RIGHT, name='Upload')
         self.GroupEnd()
 
@@ -396,7 +396,7 @@ class ShotGridUploaderDialogCommand(c4d.plugins.CommandData):
             dlgtype=c4d.DLG_TYPE_ASYNC,
             pluginid=self.pluginid,
             defaultw=400,
-            defaulth=100,
+            defaulth=300,
         )
 
     def RestoreLayout(self, sec_ref):
