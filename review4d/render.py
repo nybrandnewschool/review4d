@@ -70,12 +70,16 @@ def create_render_settings(name, doc=None, **settings):
         rd.InsertVideoPost(hw_vp)
 
     rd_data = rd.GetDataInstance()
-    rd_data[c4d.RDATA_RENDERENGINE] = c4d.RDATA_RENDERENGINE_PREVIEWHARDWARE
     rd_data[c4d.RDATA_XRES] = float(settings.get('xres', rd_data[c4d.RDATA_XRES]))
     rd_data[c4d.RDATA_YRES] = float(settings.get('yres', rd_data[c4d.RDATA_YRES]))
     rd_data[c4d.RDATA_FRAMERATE] = float(settings.get('framerate', rd_data[c4d.RDATA_FRAMERATE]))
     rd_data[c4d.RDATA_FRAMESEQUENCE] = settings.get('framesequence', rd_data[c4d.RDATA_FRAMESEQUENCE])
     rd_data[c4d.RDATA_FORMAT] = settings.get('format', c4d.FILTER_MOVIE)
+
+    # Only set these settings on first creation of Review Render Settings.
+    if not rd_exists:
+        rd_data[c4d.RDATA_RENDERENGINE] = c4d.RDATA_RENDERENGINE_PREVIEWHARDWARE
+
     rd_data.SetFilename(c4d.RDATA_PATH, settings.get('path', rd_data[c4d.RDATA_PATH]))
 
     doc.SetActiveRenderData(rd)
