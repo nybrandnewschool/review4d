@@ -347,13 +347,14 @@ class ShotGridUploaderDialog(c4d.gui.GeDialog):
 
         version_data = {
             'project': self.context.project,
-            'user': self.context.user,
             'code': name.split('.')[0],
             'description': comment,
             'sg_status_list': status,
             'sg_path_to_frames': file,
             'entity': entity,
             'sg_task': task,
+            # Fields restricted by Artist permissions...
+            # 'user': self.context.user,
         }
         version = self.CreateVersion(version_data)
         media = self.shotgun.upload(
