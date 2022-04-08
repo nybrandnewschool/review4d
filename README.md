@@ -1,7 +1,16 @@
-<p align="center"><img src="https://github.com/nybrandnewschool/review4d/blob/main/icon.png?raw=true" width="96px" /></p>
+<div align="center">
+  
+# 🎥 review4d
 
-# review4d
-A python plugin and library for Cinema 4D R24+ allowing users to render previews to preset locations and perform actions after a render completes.
+**A python plugin and library for Cinema 4D R24+ allowing users to render previews to preset locations and perform actions after a render completes.**
+
+[![Test status](https://img.shields.io/badge/Test-passing-green)](https://github.com/nybrandnewschool/review4d/actions)
+[![ShotGrid status](https://github.com/nybrandnewschool/review4d/workflows/Publish%20to%20ShotGrid/badge.svg)](https://github.com/nybrandnewschool/review4d/actions)
+[![Version](https://img.shields.io/github/v/tag/nybrandnewschool/review4d)](https://github.com/nybrandnewschool/review4d/releases)
+
+*Developed at [Brand New School](https://brandnewschool.com).*
+
+</div>
 
 ## Installation
 ### Git
