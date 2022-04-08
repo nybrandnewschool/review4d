@@ -110,6 +110,10 @@ def load_plugins():
         plugin_paths.extend(env_plugin_paths.split(os.pathsep))
 
     for path in plugin_paths:
+        if not os.path.isdir(path):
+            print('review4d> Plugin path not found: %s' % path)
+            continue
+
         for file in os.listdir(path):
             if not file.endswith('.py'):
                 continue
