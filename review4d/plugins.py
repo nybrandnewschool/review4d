@@ -70,8 +70,7 @@ def register_plugin(plugin):
     if not issubclass(plugin, PluginType):
         raise PluginError((
             'Failed to register %s.'
-            'Plugins must be a subclass of '
-            'PathPreset or ContextCollector.'
+            'Plugins must be a subclass of PathPreset or ContextCollector.'
         ) % plugin)
 
     plugin.register(plugin)
