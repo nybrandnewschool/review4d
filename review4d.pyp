@@ -43,6 +43,15 @@ class Review4dDialog(gui.GeDialog):
     }
     COMBO_FRAMESEQUENCE_DEFAULT = 2
     SPACE_FRAMES = 20010
+    LABEL_TAKES = 20011
+    COMBO_TAKES = 20012
+    COMBO_TAKES_ENUM = {
+        1: 'Active',
+        2: 'All',
+        3: 'Marked',
+    }
+    COMBO_TAKES_DEFAULT = 1
+    SPACE_TAKES = 20013
     GROUP_POSTRENDER = 30001
     GROUP_BUTTONS = 40001
     BUTTON_RENDER_SETTINGS = 40001
@@ -75,6 +84,9 @@ class Review4dDialog(gui.GeDialog):
             self.AddStaticText(self.LABEL_FRAMESEQUENCE, c4d.BFH_RIGHT, name='Frames')
             self.AddComboBox(self.COMBO_FRAMESEQUENCE, c4d.BFH_LEFT, initw=128)
             self.AddStaticText(self.SPACE_FRAMES, c4d.BFH_LEFT, name='')
+            self.AddStaticText(self.LABEL_TAKES, c4d.BFH_RIGHT, name='Takes')
+            self.AddComboBox(self.COMBO_TAKES, c4d.BFH_LEFT, initw=128)
+            self.AddStaticText(self.SPACE_TAKES, c4d.BFH_LEFT, name='')
             # self.AddCheckbox(self.CBOX_PICTUREVIEWER, c4d.BFH_LEFT, initw=0, inith=0, name='Send to Picture Viewer')
         self.GroupEnd()
 
@@ -105,11 +117,15 @@ class Review4dDialog(gui.GeDialog):
         for id, label in self.COMBO_FRAMESEQUENCE_ENUM.items():
             self.AddChild(self.COMBO_FRAMESEQUENCE, id, label)
 
+        for id, label in self.COMBO_TAKES_ENUM.items():
+            self.AddChild(self.COMBO_TAKES, id, label)
+
         presets = review4d.get_path_presets()
         for preset in presets:
             self.AddChild(self.COMBO_PRESET, preset.id, preset.label)
 
         self.SetInt32(self.COMBO_FRAMESEQUENCE, self.COMBO_FRAMESEQUENCE_DEFAULT)
+        self.SetInt32(self.COMBO_TAKES, self.COMBO_TAKES_DEFAULT)
         self.SetInt32(self.COMBO_PRESET, presets[0].id)
         self.SetInt32(self.EDIT_XRES, 1920, min=256, max=8192, step=2)
         self.SetInt32(self.EDIT_YRES, 1080, min=256, max=8192, step=2)
@@ -135,8 +151,8 @@ class Review4dDialog(gui.GeDialog):
         elif id == self.BUTTON_RENDER_SETTINGS:
             self.OnRenderSettingsClicked()
 
-        elif id == self.COMBO_PRESET:
-            self.OnPresetChanged(self.GetInt32(self.COMBO_PRESET))
+        elif id in (self.COMBO_PRESET, self.COMBO_TAKES):
+            self.RefreshPath()
 
         elif id == self.EDIT_PATH:
             self.OnPathChanged(self.GetString(self.EDIT_PATH))
@@ -159,6 +175,7 @@ class Review4dDialog(gui.GeDialog):
             'yres': self.GetInt32(self.EDIT_YRES),
             'fps': self.GetInt32(self.EDIT_FPS),
             'framesequence': self.GetInt32(self.COMBO_FRAMESEQUENCE),
+            'takes': self.GetInt32(self.COMBO_TAKES),
         }
         for post_renderer in self.post_renderers:
             values[post_renderer.label] = self.GetBool(post_renderer.id)
@@ -217,6 +234,10 @@ class Review4dDialog(gui.GeDialog):
         if frames:
             self.SetInt32(self.COMBO_FRAMESEQUENCE, frames)
 
+        takes = settings.get('takes')
+        if takes:
+            self.SetInt32(self.COMBO_TAKES, takes)
+
         for post_renderer in self.post_renderers:
             try:
                 value = settings.get(post_renderer.label)
@@ -255,19 +276,21 @@ class Review4dDialog(gui.GeDialog):
     def OnPresetChanged(self, preset_id):
         doc_path = review4d.get_document_path()
         try:
-            preset = review4d.get_path_preset(preset_id)
-            path = review4d.get_preset_path(preset_id, doc_path)
+            path = self.GetPathPresetValue(preset_id, doc_path)
             if path:
                 with review4d.suppress_messages(self):
                     self.SetString(self.EDIT_PATH, path)
         except review4d.PathPresetError as e:
             self.SetString(self.TEXT_MSG, str(e))
 
+    def GetPathPresetValue(self, preset_id, doc_path):
+        return review4d.get_preset_path(preset_id, doc_path)
+
     def OnPathChanged(self, path):
         doc_path = review4d.get_document_path()
         for preset in review4d.get_path_presets():
             try:
-                preset_path = review4d.get_preset_path(preset.id, doc_path)
+                preset_path = self.GetPathPresetValue(preset.id, doc_path)
                 if path == preset_path:
                     with review4d.suppress_messages(self):
                         self.SetInt32(self.COMBO_PRESET, preset.id)
@@ -299,6 +322,7 @@ class Review4dDialog(gui.GeDialog):
             yres=state['yres'],
             framerate=state['fps'],
             framesequence=state['framesequence'],
+            takes=state['takes'],
         )
 
     def Render(self):
@@ -326,6 +350,20 @@ def execute_all(functions, args):
         review4d.execute_in_main_thread(func, *args)
 
 
+class Review4dDialogContext(review4d.ContextCollector):
+
+    def execute(self, file, ctx):
+        if Session.dialog is None:
+            return ctx
+
+        options = Session.dialog.GetValues()
+        for opt in ["path", "preset"]:
+            options.pop(opt)
+
+        ctx.update(options)
+        return ctx
+
+
 class Review4dDialogCommand(c4d.plugins.CommandData):
 
     pluginid = review4d.RENDER_COMMAND_ID
@@ -336,10 +374,10 @@ class Review4dDialogCommand(c4d.plugins.CommandData):
     dialog = None
 
     def Execute(self, doc):
-        if self.dialog is None:
-            self.dialog = Review4dDialog()
+        if Session.dialog is None:
+            Session.dialog = Review4dDialog()
 
-        return self.dialog.Open(
+        return Session.dialog.Open(
             dlgtype=c4d.DLG_TYPE_ASYNC,
             pluginid=self.pluginid,
             defaultw=400,
@@ -347,10 +385,10 @@ class Review4dDialogCommand(c4d.plugins.CommandData):
         )
 
     def RestoreLayout(self, sec_ref):
-        if self.dialog is None:
-            self.dialog = Review4dDialog()
+        if Session.dialog is None:
+            Session.dialog = Review4dDialog()
 
-        return self.dialog.Restore(
+        return Session.dialog.Restore(
             pluginid=self.pluginid,
             secret=sec_ref,
         )
@@ -392,7 +430,14 @@ class Review4dCommandQueue(c4d.plugins.MessageData):
         )
 
 
+class Session:
+    dialog = None
+
+
 if __name__ == "__main__":
+    # Register dialog context
+    review4d.register_plugin(Review4dDialogContext)
+
     # Load review4d plugins
     review4d.load_plugins()
 

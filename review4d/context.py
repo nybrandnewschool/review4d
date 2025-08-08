@@ -61,13 +61,12 @@ def get_preview_name_from_context(ctx):
 
     basename = ctx.get('basename')
     version = ctx.get('version')
+    use_takes = ctx.get("takes", 1)
 
-    if basename and version:
-        return f'{basename}_{version}.mp4'
-    elif basename:
-        return f'{basename}.mp4'
+    if use_takes > 1:
+        return "$prj_$take.mp4"
     else:
-        return 'untitled.mp4'
+        return "$prj.mp4"
 
 
 class DefaultContextCollector(ContextCollector):

@@ -29,12 +29,19 @@ class PostRender(PluginType):
     enabled = False  # PostRender items will be unchecked in UI by default.
     _base_id = 30001
 
-    def is_available(self):
+    def is_available(self, options=None):
         '''Return True if this plugin is available for execution.
 
         You may want to check if certain resources are available. For example
-        if you wanted to write an upload to ShotGrid AfterREnder plugin, this
+        if you wanted to write an upload to ShotGrid after render plugin, this
         method may ensure that sgtk is importable.
+
+        is_available is first called when opening the UI, to determine whether
+        the Plugin is generally available. The <options> argument will be None
+        in this case.
+
+        Just before rendering, is_available will be called once more, to ensure
+        that, given the options, that the PostRender plugin is applicable.
         '''
 
         return True

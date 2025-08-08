@@ -10,7 +10,7 @@ class ShowFile(review4d.PostRender):
     label = 'Show in File Browser'
     enabled = False
 
-    def is_available(self):
+    def is_available(self, options=None):
         return sys.platform in ['win32', 'darwin', 'linux2']
 
     def execute(self, render_path):

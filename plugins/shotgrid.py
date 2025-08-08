@@ -371,7 +371,7 @@ class ShotGridPostRender(review4d.PostRender):
     label = 'Upload to ShotGrid'
     enabled = True
 
-    def is_available(self):
+    def is_available(self, options=None):
         return SHOTGRID_AVAILABLE
 
     def execute(self, render_path):
