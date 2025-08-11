@@ -3,7 +3,7 @@ name: Publish to ShotGrid
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   publish:
@@ -12,9 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Publish cpenv module
-        uses: cpenv/github-actions-publish@v1
+        uses: cpenv/github-actions-publish@v2
         with:
-          module_root: '.'
+          module_root: "."
           repo_name: bns_shotgun
           repo_type: shotgun
           repo_shotgrid_base_url: ${{ secrets.SHOTGRID_BASE_URL }}
