@@ -53,8 +53,6 @@ def collect_context(file):
 def get_preview_name_from_context(ctx):
     """Use a context to generate a preview name."""
 
-    basename = ctx.get("basename")
-    version = ctx.get("version")
     use_takes = ctx.get("takes", 1)
 
     if use_takes > 1:

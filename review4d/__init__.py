@@ -11,7 +11,7 @@ from .ui import *
 __author__ = "Brand New School, Dan Bradham"
 __email__ = "dan@brandnewschool.com"
 __license__ = "MIT"
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 version_info = tuple([int(i) for i in __version__.split(".")])
 
 
