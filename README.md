@@ -1,5 +1,5 @@
 <div align="center">
-  
+
 # 🎥 review4d
 
 **A python plugin and library for Cinema 4D R24+ allowing users to render previews to preset locations and perform actions after a render completes.**
@@ -82,18 +82,18 @@ Finally we can create a PostRender plugin to show the rendered file in windows e
     ...
     import sys
     import subprocess
- 
+
     ...
     class ShowInFileBrowser(review4d.PostRender):
-    
+
         label = 'Show in File Browser'
         enabled = True  # Enable the checkbox in the UI by default
- 
+
         def is_available(self):
-            # You can return False here if your plugin has some required resources 
+            # You can return False here if your plugin has some required resources
             # that are unavailable. See the `review4d/plugins/shotgrid.py` for an example.
             return True
-    
+
         def execute(self, render_path):
             if sys.platform == 'darwin':
                 subprocess.run(['open', '-R', render_path])
@@ -101,6 +101,11 @@ Finally we can create a PostRender plugin to show the rendered file in windows e
                 subprocess.run(['xdg-open', os.path.dirname(render_path)])
             elif sys.platform == 'win32':
                 subprocess.run(['explorer', '/select,', render_path.replace('/', '\\')])
+
+    def register():
+        ...
+        review4d.register_plugin(ShowInFileBrowser)
+
 
 ## Contibuting
 Contributions are welcome.

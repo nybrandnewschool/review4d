@@ -1,5 +1,5 @@
-
 import traceback
+
 try:
     from queue import Queue
 except ImportError:
@@ -9,10 +9,9 @@ import c4d
 
 from .constants import COMMAND_QUEUE_ID
 
-
 __all__ = [
-    'execute_in_main_thread',
-    'execute_queued_commands',
+    "execute_in_main_thread",
+    "execute_queued_commands",
 ]
 
 

@@ -1,15 +1,14 @@
 import contextlib
 
-
 __all__ = [
-    'suppress_messages',
-    'messages_suppressed',
+    "suppress_messages",
+    "messages_suppressed",
 ]
 
 
 @contextlib.contextmanager
 def suppress_messages(ui):
-    previous_value = getattr(ui, 'messages_suppressed', False)
+    previous_value = getattr(ui, "messages_suppressed", False)
     try:
         ui.messages_suppressed = True
         yield
@@ -18,4 +17,4 @@ def suppress_messages(ui):
 
 
 def messages_suppressed(ui):
-    return getattr(ui, 'messages_suppressed', False)
+    return getattr(ui, "messages_suppressed", False)
