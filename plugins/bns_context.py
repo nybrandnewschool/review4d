@@ -1,11 +1,7 @@
 import os
 import re
 
-import c4d
-
 import review4d
-from review4d.paths import normalize
-
 
 CTX_PATTERNS = [
     r"/animation/3d/(?P<folder>.*?)/(?P<parent>.*?)/(?P<name>.*?)(/|$)",
@@ -15,7 +11,7 @@ CTX_PATTERNS = [
 
 
 class BnsContextCollector(review4d.ContextCollector):
-    '''Extracts context related to BNS projects folder structure.
+    """Extracts context related to BNS projects folder structure.
 
     Example:
 
@@ -27,29 +23,28 @@ class BnsContextCollector(review4d.ContextCollector):
             'parent': 'seq',
             'name': 'seq_010',
         }
-    '''
+    """
 
     def execute(self, file, ctx):
-
         bns_ctx = {
-            'project': '',
-            'project_root': '',
-            'folder': '',
-            'parent': '',
-            'name': '',
+            "project": "",
+            "project_root": "",
+            "folder": "",
+            "parent": "",
+            "name": "",
         }
 
         for pattern in CTX_PATTERNS:
             match = re.search(pattern, file, re.IGNORECASE)
             if match:
                 bns_ctx.update(match.groupdict())
-                project_root = file[:match.start()]
-                bns_ctx['project_root'] = project_root
-                bns_ctx['project'] = os.path.basename(project_root)
+                project_root = file[: match.start()]
+                bns_ctx["project_root"] = project_root
+                bns_ctx["project"] = os.path.basename(project_root)
                 break
 
-        if not bns_ctx['project_root']:
-            bns_ctx['project_root'] = ctx['dirname']
+        if not bns_ctx["project_root"]:
+            bns_ctx["project_root"] = ctx["dirname"]
 
         ctx.update(bns_ctx)
         return ctx

@@ -1,32 +1,29 @@
-'''PathPreset api and builtins.'''
-
-from .plugins import PluginType, register_plugin
-from .context import collect_context, get_preview_name_from_context
 from . import paths
-
+from .context import get_preview_name_from_context
+from .plugins import PluginType, register_plugin
 
 __all__ = [
-    'get_path_preset',
-    'get_path_presets',
-    'get_preset_path',
-    'PathPreset',
-    'PathPresetError',
+    "get_path_preset",
+    "get_path_presets",
+    "get_preset_path",
+    "PathPreset",
+    "PathPresetError",
 ]
 
 
 class PathPreset(PluginType):
-    '''PathPreset plugins are used to generate an output path for the review4d
+    """PathPreset plugins are used to generate an output path for the review4d
     dialog. The ctx object contains valuable information about the active
-    document and file path.'''
+    document and file path."""
 
     def execute(self, ctx):
-        '''Implement this method to return a file path for rendering.'''
+        """Implement this method to return a file path for rendering."""
 
         return NotImplemented
 
 
 class PathPresetError(Exception):
-    '''Raised by PathPreset subclasses to notify UI that preset failed to generate a path.'''
+    """Raised by PathPreset subclasses to notify UI that preset failed to generate a path."""
 
 
 def get_path_preset(preset_label_or_id):
@@ -34,13 +31,13 @@ def get_path_preset(preset_label_or_id):
 
 
 def get_path_presets():
-    '''Get a list of all PathPreset plugins.'''
+    """Get a list of all PathPreset plugins."""
 
     return PathPreset.list()
 
 
 def get_preset_path(preset_label_or_id, file):
-    '''Execute a PathPreset plugin by label or id.
+    """Execute a PathPreset plugin by label or id.
 
     Arguments:
         preset_label_or_id (str, int): PathPreset lookup like "Custom" or 100.
@@ -48,17 +45,17 @@ def get_preset_path(preset_label_or_id, file):
 
     Returns:
         str: Full path to output file for review.
-    '''
+    """
 
     preset = get_path_preset(preset_label_or_id)
     from . import context
+
     ctx = context.collect_context(file)
     return preset().execute(ctx)
 
 
 class UserPreviewsPreset(PathPreset):
-
-    label = 'User Previews'
+    label = "User Previews"
     order = 1
 
     def execute(self, ctx):
@@ -71,8 +68,7 @@ class UserPreviewsPreset(PathPreset):
 
 
 class DesktopPreset(PathPreset):
-
-    label = 'Desktop'
+    label = "Desktop"
     order = 2
 
     def execute(self, ctx):
@@ -85,8 +81,7 @@ class DesktopPreset(PathPreset):
 
 
 class CustomPreset(PathPreset):
-
-    label = 'Custom'
+    label = "Custom"
     order = 100
 
     def execute(self, ctx):
