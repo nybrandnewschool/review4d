@@ -15,6 +15,7 @@ __all__ = [
     "iter_takes",
     "render_to_pictureviewer",
     "set_active_render_settings",
+    "Takes",
 ]
 
 
@@ -42,9 +43,12 @@ def set_active_render_settings(name, *, doc=None):
     if rd := get_render_settings(name, doc=doc):
         doc.SetActiveRenderData(rd)
         c4d.EventAdd()
+        c4d.gui.GeUpdateUI()
 
 
 def edit_render_settings_dialog():
+    """Opens the Render Settings dialog."""
+
     c4d.CallCommand(12161)
 
 
@@ -93,9 +97,9 @@ def create_render_settings(name, *, doc=None, **settings):
     )
     rd_data[c4d.RDATA_FORMAT] = settings.get("format", c4d.FILTER_MOVIE)
 
-    # # Only set these settings on first creation of Review Render Settings.
-    # if not rd_exists:
-    #     rd_data[c4d.RDATA_RENDERENGINE] = c4d.RDATA_RENDERENGINE_PREVIEWHARDWARE
+    # Only set these settings on first creation of Review Render Settings.
+    if not rd_exists:
+        rd_data[c4d.RDATA_RENDERENGINE] = c4d.RDATA_RENDERENGINE_PREVIEWHARDWARE
 
     rd_data.SetFilename(c4d.RDATA_PATH, settings.get("path", rd_data[c4d.RDATA_PATH]))
 
@@ -122,14 +126,28 @@ def execute_after_render(callback):
 
 
 class Takes:
+    """Takes Enum."""
+
     active = 1
     all = 2
     marked = 3
 
+    @staticmethod
+    def is_valid(value):
+        return value in [Takes.active, Takes.all, Takes.marked]
 
-def render_to_pictureviewer(takes=Takes.active, callback=None, *, doc=None):
+
+def render_to_pictureviewer(render_settings, takes=Takes.active, callback=None, *, doc=None):
     """Call the Render To PictureViewer command."""
+
     doc = doc or c4d.documents.GetActiveDocument()
+
+    # Validate parameters
+    if get_render_settings(render_settings) is None:
+        raise ValueError(f"Render Settings named '{render_settings}' do not exist.")
+
+    if not Takes.is_valid(takes):
+        raise ValueError(f"Got '{takes}' for takes expected one of [1, 2, 3] or [Takes.active, Takes.all, Takes.marked].")
 
     # Render to pictureviewer
     if takes == Takes.active:
@@ -151,37 +169,52 @@ def render_to_pictureviewer(takes=Takes.active, callback=None, *, doc=None):
     pipeline = partial(
         execute_funcs,
         callback,
-        partial(set_take, get_active_take(doc=doc)),
+        partial(set_take, render_settings, get_active_take(doc=doc)),
     )
     for take in list(iter_takes(marked=takes == Takes.marked, doc=doc))[::-1]:
-        pipeline = partial(render_take, take, callback=pipeline, doc=doc)
+        pipeline = partial(render_take, render_settings, take, callback=pipeline, doc=doc)
 
     # Execute pipeline
     pipeline()
 
 
 def execute_funcs(*tasks):
+    """Execute a bunch of functions sequentially."""
+
     for task in tasks:
         if task is not None:
             task()
 
 
 def get_active_take(doc=None):
+    """Get the active Take."""
+
     doc = doc or c4d.documents.GetActiveDocument()
     data = mxutils.CheckType(doc.GetTakeData())
     return data.GetCurrentTake()
 
 
-def set_take(take, *, doc=None):
+def set_take(render_settings, take, *, doc=None):
+    """Set the active Take."""
+
+    print(f"Setting Take to {take.GetName()}")
     doc = doc or c4d.documents.GetActiveDocument()
     data = mxutils.CheckType(doc.GetTakeData())
     data.SetCurrentTake(take)
     c4d.EventAdd()
 
+    print(f"Setting Render Settings to {render_settings}")
+    set_active_render_settings(render_settings)
 
-def render_take(take, *, callback=None, doc=None):
+
+def render_take(render_settings, take, *, callback=None, doc=None):
+    """Render a Take.
+
+    Waits for the render to finish, then execute the callback function.
+    """
+
     doc = doc or c4d.documents.GetActiveDocument()
-    set_take(take, doc=doc)
+    set_take(render_settings, take, doc=doc)
     c4d.CallCommand(12099)
     if callback:
         thread = threading.Thread(
@@ -203,7 +236,7 @@ def iter_takes(marked=False, *, doc=None):
             yield take
 
 
-def expand_render_paths(path, render_settings_name, takes=Takes.active, *, doc=None):
+def expand_render_paths(path, render_settings, takes=Takes.active, *, doc=None):
     """Expand the tokens in a render path.
 
     Returns:
@@ -211,7 +244,7 @@ def expand_render_paths(path, render_settings_name, takes=Takes.active, *, doc=N
     """
 
     doc = doc or c4d.documents.GetActiveDocument()
-    rdata = get_render_settings(render_settings_name, doc=doc)
+    rdata = get_render_settings(render_settings, doc=doc)
     rpd = {
         "_doc": doc,
         "_rData": rdata,
@@ -224,7 +257,7 @@ def expand_render_paths(path, render_settings_name, takes=Takes.active, *, doc=N
         filename = c4d.modules.tokensystem.StringConvertTokens(path, rpd)
         paths.append(filename)
     else:
-        for take in iter_takes(marked=takes == Takes.all, doc=doc):
+        for take in iter_takes(marked=takes == Takes.marked, doc=doc):
             take_rpd = dict(_take=take, **rpd)
             filename = c4d.modules.tokensystem.StringConvertTokens(path, take_rpd)
             paths.append(filename)

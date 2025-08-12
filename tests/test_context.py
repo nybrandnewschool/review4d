@@ -1,9 +1,6 @@
-import os
 import unittest
 
 import review4d
-
-import c4d
 
 
 class TestBuiltinContextCollectors(unittest.TestCase):
