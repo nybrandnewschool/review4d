@@ -10,10 +10,11 @@ __all__ = [
     "create_render_settings",
     "edit_render_settings_dialog",
     "execute_after_render",
-    "get_render_settings",
-    "render_to_pictureviewer",
-    "iter_takes",
     "expand_render_paths",
+    "get_render_settings",
+    "iter_takes",
+    "render_to_pictureviewer",
+    "set_active_render_settings",
 ]
 
 
@@ -31,6 +32,16 @@ def get_render_settings(name, *, doc=None):
             return rd
 
         rd = rd.GetNext()
+
+
+def set_active_render_settings(name, *, doc=None):
+    """Set the active RenderData object by name."""
+
+    doc = doc or c4d.documents.GetActiveDocument()
+
+    if rd := get_render_settings(name, doc=doc):
+        doc.SetActiveRenderData(rd)
+        c4d.EventAdd()
 
 
 def edit_render_settings_dialog():
@@ -82,14 +93,15 @@ def create_render_settings(name, *, doc=None, **settings):
     )
     rd_data[c4d.RDATA_FORMAT] = settings.get("format", c4d.FILTER_MOVIE)
 
-    # Only set these settings on first creation of Review Render Settings.
-    if not rd_exists:
-        rd_data[c4d.RDATA_RENDERENGINE] = c4d.RDATA_RENDERENGINE_PREVIEWHARDWARE
+    # # Only set these settings on first creation of Review Render Settings.
+    # if not rd_exists:
+    #     rd_data[c4d.RDATA_RENDERENGINE] = c4d.RDATA_RENDERENGINE_PREVIEWHARDWARE
 
     rd_data.SetFilename(c4d.RDATA_PATH, settings.get("path", rd_data[c4d.RDATA_PATH]))
 
     doc.SetActiveRenderData(rd)
     c4d.EventAdd()
+    c4d.gui.GeUpdateUI()
     return rd
 
 
@@ -183,21 +195,12 @@ def iter_takes(marked=False, *, doc=None):
     """Iterate over the Takes in a document."""
 
     doc = doc or c4d.documents.GetActiveDocument()
-    data = mxutils.CheckType(doc.GetTakeData())
-    active_take = data.GetCurrentTake()
-    root_take = data.GetMainTake()
+    take_data = mxutils.CheckType(doc.GetTakeData())
+    main_take = take_data.GetMainTake()
 
-    try:
-        # Iterate over take tree yielding takes.
-        for take in mxutils.IterateTree(root_take):
-            if not marked or marked and take.IsChecked():
-                data.SetCurrentTake(take)
-                c4d.EventAdd()
-                yield take
-    finally:
-        # Restore the active take.
-        data.SetCurrentTake(active_take)
-        c4d.EventAdd()
+    for take in mxutils.IterateTree(main_take):
+        if not marked or marked and take.IsChecked():
+            yield take
 
 
 def expand_render_paths(path, render_settings_name, takes=Takes.active, *, doc=None):
@@ -206,8 +209,6 @@ def expand_render_paths(path, render_settings_name, takes=Takes.active, *, doc=N
     Returns:
         List of filepaths with tokens resolved.
     """
-
-    # TODO: Fix $take token expansion. Why doesn't it expand?!
 
     doc = doc or c4d.documents.GetActiveDocument()
     rdata = get_render_settings(render_settings_name, doc=doc)
@@ -222,13 +223,8 @@ def expand_render_paths(path, render_settings_name, takes=Takes.active, *, doc=N
     if takes == Takes.active:
         filename = c4d.modules.tokensystem.StringConvertTokens(path, rpd)
         paths.append(filename)
-    elif takes == Takes.all:
-        for take in iter_takes(doc=doc):
-            take_rpd = dict(_take=take, **rpd)
-            filename = c4d.modules.tokensystem.StringConvertTokens(path, take_rpd)
-            paths.append(filename)
     else:
-        for take in iter_takes(marked=True, doc=doc):
+        for take in iter_takes(marked=takes == Takes.all, doc=doc):
             take_rpd = dict(_take=take, **rpd)
             filename = c4d.modules.tokensystem.StringConvertTokens(path, take_rpd)
             paths.append(filename)

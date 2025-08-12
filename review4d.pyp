@@ -333,22 +333,26 @@ class Review4dDialog(gui.GeDialog):
     def Render(self):
         state = self.GetValues()
 
-        render_paths = review4d.expand_render_paths(
-            path=state["path"],
-            render_settings_name=RENDER_SETTINGS_NAME,
-            takes=state["takes"],
-        )
-        print(f"{render_paths=}")
+        # Build post render callback
+        post_render_callback = None
         post_render_functions = [
             pr().execute for pr in self.post_renderers if state.get(pr.label, False)
         ]
-        args = (render_paths,)
         if post_render_functions:
-            callback = partial(execute_all, post_render_functions, args)
-        else:
-            callback = None
+            render_paths = review4d.expand_render_paths(
+                path=state["path"],
+                render_settings_name=RENDER_SETTINGS_NAME,
+                takes=state["takes"],
+            )
+            args = (render_paths,)
+            post_render_callback = partial(execute_all, post_render_functions, args)
 
-        review4d.render_to_pictureviewer(state["takes"], callback)
+        # Make sure the UI updates.
+        c4d.EventAdd()
+        c4d.gui.GeUpdateUI()
+
+        # Render!!
+        review4d.render_to_pictureviewer(state["takes"], post_render_callback)
 
 
 def execute_all(functions, args):
