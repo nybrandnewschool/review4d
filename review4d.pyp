@@ -1,14 +1,12 @@
-# Standard library imports
 import json
 import os
 import sys
+import time
 from functools import partial
 
-# Third party imports
 import c4d
 from c4d import gui
 
-# Local imports
 sys.path.insert(1, os.path.dirname(__file__))
 import review4d
 
@@ -42,9 +40,9 @@ class Review4dDialog(gui.GeDialog):
     LABEL_TAKES = 20011
     COMBO_TAKES = 20012
     COMBO_TAKES_ENUM = {
-        1: "Active",
-        2: "All",
-        3: "Marked",
+        review4d.Takes.active: "Active",
+        review4d.Takes.all: "All",
+        review4d.Takes.marked: "Marked",
     }
     COMBO_TAKES_DEFAULT = 1
     SPACE_TAKES = 20013
@@ -341,18 +339,18 @@ class Review4dDialog(gui.GeDialog):
         if post_render_functions:
             render_paths = review4d.expand_render_paths(
                 path=state["path"],
-                render_settings_name=RENDER_SETTINGS_NAME,
+                render_settings=RENDER_SETTINGS_NAME,
                 takes=state["takes"],
             )
             args = (render_paths,)
             post_render_callback = partial(execute_all, post_render_functions, args)
 
-        # Make sure the UI updates.
-        c4d.EventAdd()
-        c4d.gui.GeUpdateUI()
-
         # Render!!
-        review4d.render_to_pictureviewer(state["takes"], post_render_callback)
+        review4d.render_to_pictureviewer(
+            render_settings=RENDER_SETTINGS_NAME,
+            takes=state["takes"],
+            callback=post_render_callback,
+        )
 
 
 def execute_all(functions, args):

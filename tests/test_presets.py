@@ -7,6 +7,7 @@ import review4d
 
 
 class TestBuiltinPathPresets(unittest.TestCase):
+
     def setUp(self):
         self.doc = c4d.documents.BaseDocument()
         c4d.documents.InsertBaseDocument(self.doc)
@@ -69,9 +70,12 @@ class TestBuiltinPathPresets(unittest.TestCase):
         self.set_document_path("/some/document.c4d")
 
         # Test without takes.
-        # 1 = Active Takes
         expected = ["/some/document.mp4"]
-        result = review4d.expand_render_paths("/some/$prj.mp4", self.render_settings, 1)
+        result = review4d.expand_render_paths(
+            "/some/$prj.mp4",
+            self.render_settings,
+            review4d.Takes.active,
+        )
         self.assertEqual(result, expected)
 
         # Create a take.
@@ -83,7 +87,6 @@ class TestBuiltinPathPresets(unittest.TestCase):
         main_take.SetChecked(False)
 
         # Test with ALL takes.
-        # 2 = All Takes
         expected = [
             "/some/document_Main.mp4",
             "/some/document_Marked.mp4",
@@ -91,16 +94,15 @@ class TestBuiltinPathPresets(unittest.TestCase):
         result = review4d.expand_render_paths(
             "/some/$prj_$take.mp4",
             self.render_settings,
-            2,
+            review4d.Takes.all,
         )
         self.assertEqual(result, expected)
 
         # Test with MARKED takes.
-        # 3 = Marked Takes
         expected = ["/some/document_Marked.mp4"]
         result = review4d.expand_render_paths(
             "/some/$prj_$take.mp4",
             self.render_settings,
-            3,
+            review4d.Takes.marked,
         )
         self.assertEqual(result, expected)
