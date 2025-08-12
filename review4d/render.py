@@ -197,13 +197,11 @@ def get_active_take(doc=None):
 def set_take(render_settings, take, *, doc=None):
     """Set the active Take."""
 
-    print(f"Setting Take to {take.GetName()}")
     doc = doc or c4d.documents.GetActiveDocument()
     data = mxutils.CheckType(doc.GetTakeData())
     data.SetCurrentTake(take)
     c4d.EventAdd()
 
-    print(f"Setting Render Settings to {render_settings}")
     set_active_render_settings(render_settings)
 
 
